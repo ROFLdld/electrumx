@@ -1,0 +1,183 @@
+########################################################################
+##      This guide assumes a new installation of Ubuntu 16.04         ##
+##  We will be working mostly withing the home directory of the user  ##
+## Things not touched on: port forwarding, auto running at startup,   ##
+##       and adding additional servers to the garlium client          ##
+##                                                                    ##
+##   Credit to xSke and bauerj for the electrumx fork and installer   ##
+##	               	created by ROFLdld                            ##
+########################################################################
+
+
+
+**Install electrumx using installer script, pointing it to the xSke fork, as well as using leveldb for the database**
+wget https://raw.githubusercontent.com/bauerj/electrumx-installer/master/bootstrap.sh -O - | bash -s - --leveldb --electrumx-git-url https://github.com/xSke/electrumx.git
+
+
+**Inside the home directory download the latest linux wallet**
+wget https://github.com/GarlicoinOrg/Garlicoin/releases/download/20180123154915-i686-pc-linux-gnu/Garlicoin-x86_64-unknown-linux-gnu.tar.gz
+
+
+**Extract file**
+tar xzvf Garlicoin-x86_64-unknown-linux-gnu.tar.gz
+
+
+**Move the extracted folder to a new folder**
+mv 19.5-x86_64-unknown-linux-gnu/ garlicoin
+
+
+**Remove zipped file**
+rm Garlicoin-x86_64-unknown-linux-gnu.tar.gz
+
+
+**Make hidden garlicoin directory**
+mkdir ~/.garlicoin
+
+
+**Access this directory**
+cd .garlicoin
+
+
+**Create garlicoin.conf file**
+nano garlicoin.conf
+
+
+**Add the following, changing USER and PASSWROD as you so desire**
+rpcuser=USER
+rpcpassword=PASSWORD
+rpcport=42070
+
+upnp=1
+server=1
+listen=1
+daemon=1
+txindex=1
+
+addnode=174.119.90.59
+addnode=52.39.1.167
+addnode=128.82.17.231
+addnode=172.31.29.127
+addnode=67.181.72.208
+addnode=5.196.13.45
+addnode=185.185.126.143
+addnode=86.17.122.85
+addnode=52.89.91.13
+addnode=151.230.250.248
+addnode=86.17.164.241
+addnode=92.233.163.178
+addnode=94.224.222.136
+addnode=24.141.22.198
+addnode=51.175.34.47
+addnode=37.33.112.16
+addnode=108.204.153.25
+addnode=68.54.119.120
+addnode=35.225.227.111
+addnode=80.211.208.43
+addnode=70.106.228.160
+
+
+**Save and exit nano by using**
+ctrl + x
+y
+enter
+
+
+**Switch to garlicoin/bin folder**
+cd ~/garlicoin/bin
+
+
+**Run garlicoin daemon**
+./garlicoind
+
+
+**This will connect and begin to download blocks, and may take a while. You can check status with**
+./garlicoin-cli getinfo
+
+
+**Connections should show as >1 and blocks should be increasing**
+
+
+**Edit the electrumx.conf file**
+sudo nano /etc/electrumx.conf
+
+
+**Change info to reflect the following, adjusting as needed, including (ip address here)**
+# default /etc/electrumx.conf for systemd
+
+# REQUIRED
+DB_DIRECTORY = /db
+# Bitcoin Node RPC Credentials
+DAEMON_URL = http://USER:PASSWORD@localhost:42070/
+
+# See https://github.com/kyuupichan/electrumx/blob/master/docs/ENVIRONMENT.rst for
+# information about other configuration settings you probably want to consider.
+
+SSL_CERTFILE=/etc/electrumx/server.crt
+SSL_KEYFILE=/etc/electrumx/server.key
+TCP_PORT=50001
+SSL_PORT=50002
+# Listen on all interfaces:
+HOST=(ip address here)
+USERNAME=electrumx
+COIN=Garlicoin
+
+
+**Save and exit**
+ctrl + x
+y
+enter
+
+
+**Open tcp ports needed, 50001 and 50002**
+sudo iptables -A INPUT -p tcp --dport 50001 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 50002 -j ACCEPT
+
+
+**Start electrumx server**
+sudo service electrumx start
+
+
+**You can monitor the electrumx server with**
+journalctl -u electrumx -f
+
+
+**optional create a banner file**
+cd ~/garlicoin/
+nano banner.txt
+
+
+**edit banner.txt to say whatever you want, I like**
+
+Welcome to (name), a (name) Garlicoin Garlium node!
+
+Garlicoin Core $DAEMON_VERSION
+$VERSION
+
+If you would like to support this server you can donate by clicking
+          "Help -> Donate to server"
+in your Garlium Client, or use $DONATION_ADDRESS directly.
+
+Thank you!
+
+
+**save with**
+ctrl + x
+y
+enter
+
+
+**edit electrumx.conf**
+sudo nano /etc/electrumx.conf
+
+
+**add the following lines at the bottom, adding your garlicoin address and path to the banner file (example: /home/user/garlicoin/banner.txt)**
+BANNER_FILE=(path to banner file)
+DONATION_ADDRESS=(your garlicoin address)
+
+
+**restart electrumx server with**
+sudo service electrumx stop
+sudo service electrumx start
+
+
+**if you liked this guide please consider donating to: Getgds1UgUEe3WfxqTYLb41oaAN1KCcutd**
